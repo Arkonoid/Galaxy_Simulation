@@ -42,6 +42,11 @@ def planet_codes(code):
             return "UNDEFINED"
 
 
+morphology_general_list = ["Primate", "Cetacea", "Arthropod"]
+
+morphology_limbs_list = [0, 2, 4, 6, 8, 10, 12]
+
+
 # Create 'Galaxy' class
 class Galaxy:
     def __init__(self, number_of_stars):
@@ -58,11 +63,12 @@ galaxy1 = Galaxy(galaxy_star_count)
 
 # Create 'Planet' class
 class Planet:
-    def __init__(self, planet_id, size, primary_biome, distance_from_star):
+    def __init__(self, planet_id, size, primary_biome, distance_from_star, habitable):
         self.planet_id = planet_id
         self.size = size
         self.primary_biome = primary_biome
         self.distance_from_star = distance_from_star
+        self.habitable = habitable
         pass
 
 
@@ -76,7 +82,7 @@ planet_list = []
 for i in range(planet_count):
     temp_id = i
     temp_size = random_generator(1, 10)
-    temp_distance_from_star = round((random_generator(0, 1) + random_generator(30, 100) * 0.01), 2)
+    temp_distance_from_star = round((random_generator(30, 200) * 0.01), 2)
 
     # Generates different kinds of planets based on their distance from the star
     if temp_distance_from_star <= 0.6:
@@ -107,7 +113,24 @@ for i in range(planet_count):
         temp_primary_biome = planet_codes(
             random.choices(planet_codes_weighted_list, weights=(0.6, 0, 0, 0, 0, 0, 0, 0, 0, 0.4, 0, 0))[0])
 
-    planet = Planet(temp_id, temp_size, temp_primary_biome, temp_distance_from_star)
+    # Decides whether a fringe planet will be able to support life
+    habitability_factor = round(random_generator(0, 100) * 0.01, 2)
+
+    temp_habitable = True
+
+    if temp_primary_biome == "Barren":
+        temp_habitable = False
+    elif temp_primary_biome == "Lava" or temp_primary_biome == "Toxic":
+        if habitability_factor < 0.95:
+            temp_habitable = False
+    elif temp_primary_biome == "Craig" or temp_primary_biome == "Desert" or temp_primary_biome == "Arctic":
+        if habitability_factor < 0.8:
+            temp_habitable = False
+    else:
+        temp_habitable = True
+
+    # Creates the planet based on the generated properties
+    planet = Planet(temp_id, temp_size, temp_primary_biome, temp_distance_from_star, temp_habitable)
 
     # Add the newly created planet to the list
     planet_list.append(planet)
@@ -117,9 +140,55 @@ for i in range(planet_count):
 #     print(planet_list[i].size)
 #     print(planet_list[i].primary_biome)
 #     print(planet_list[i].distance_from_star)
+#     print(planet_list[i].habitable)
 #     print("-------------------")
 
-# Create 'Species' class (id, morphology general, morphology limbs, height, weight, sapience index)
+
+# Create 'Species' class
+class Species:
+    def __init__(self, species_id, morphology_general, morphology_limbs, height, weight, sapience_index):
+        self.species_id = species_id
+        self.morphology_general = morphology_general
+        self.morphology_limbs = morphology_limbs
+        self.height = height
+        self.weight = weight
+        self.sapience_index = sapience_index
+
+
+# Create a list for the species to go into
+species_list = []
+
+for i in range(len(planet_list)):
+    if planet_list[i].habitable:
+        temp_species_id = i
+        if planet_list[i].primary_biome == "Temperate":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.45, 0.1, 0.45))[0]
+        elif planet_list[i].primary_biome == "Forest":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.5, 0.05, 0.45))[0]
+        elif planet_list[i].primary_biome == "Archipelago":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.3, 0.6, 0.1))[0]
+        elif planet_list[i].primary_biome == "Ocean":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.0, 1.0, 0.0))[0]
+        elif planet_list[i].primary_biome == "Craig":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.2, 0.0, 0.8))[0]
+        elif planet_list[i].primary_biome == "Lava":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.0, 0.0, 1.0))[0]
+        elif planet_list[i].primary_biome == "Jungle":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.4, 0.4, 0.2))[0]
+        elif planet_list[i].primary_biome == "Tundra":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.7, 0.2, 0.1))[0]
+        elif planet_list[i].primary_biome == "Arctic":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.1, 0.9, 0.0))[0]
+        elif planet_list[i].primary_biome == "Desert":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.1, 0.0, 0.9))[0]
+        elif planet_list[i].primary_biome == "Toxic":
+            temp_morphology_general = random.choices(morphology_general_list, weights=(0.0, 0.1, 0.9))[0]
+        temp_morphology_limbs = random.choices(morphology_limbs_list, weights=(0.02, 0.08, 0.4, 0.3, 0.1, 0.06, 0.04))
+
+        # print(planet_list[i].primary_biome)
+        # print(temp_morphology_general)
+        # print("-----------------------")
+
 
 # output a csv file for the planets and the species separately
 
@@ -141,14 +210,6 @@ for i in range(planet_count):
 
 # Generate 'Planet' class
 
-
-planet_number = galaxy_star_count / 1000
-print(planet_number)
-
-habitable_planet_count = planet_number * 0.001
-print(habitable_planet_count)
-
-
 #   Generate number of planets based on stars
 
 #   Generate distance of planets
@@ -156,14 +217,7 @@ print(habitable_planet_count)
 #   Generate type of planet
 
 # Generate 'Species' class
-class Species:
-    def __init__(self, id, morphology_general, morphology_limbs, height, weight, sapience_index):
-        self.id = id
-        self.morphology_general = morphology_general
-        self.morphology_limbs = morphology_limbs
-        self.height = height
-        self.weight = weight
-        self.sapience_index = sapience_index
+
 
 #   Generate species based on planet type
 #   Generate species traits
