@@ -1,5 +1,6 @@
 # Imports
 import random
+import math
 
 
 # Setup generator functions
@@ -45,6 +46,11 @@ def planet_codes(code):
 morphology_general_list = ["Primate", "Cetacea", "Arthropod"]
 
 morphology_limbs_list = [0, 2, 4, 6, 8, 10, 12]
+
+species_height_list = [3, 2, 1, 0]
+species_weight_list_small = []
+species_weight_list_medium = []
+species_weight_list_large = []
 
 
 # Create 'Galaxy' class
@@ -135,6 +141,7 @@ for i in range(planet_count):
     # Add the newly created planet to the list
     planet_list.append(planet)
 
+
 # for i in range(planet_count):
 #     print(planet_list[i].planet_id)
 #     print(planet_list[i].size)
@@ -146,8 +153,10 @@ for i in range(planet_count):
 
 # Create 'Species' class
 class Species:
-    def __init__(self, species_id, morphology_general, morphology_limbs, height, weight, sapience_index):
+    def __init__(self, species_id, species_planet_id, morphology_general, morphology_limbs, height, weight,
+                 sapience_index):
         self.species_id = species_id
+        self.species_planet_id = species_planet_id
         self.morphology_general = morphology_general
         self.morphology_limbs = morphology_limbs
         self.height = height
@@ -157,10 +166,15 @@ class Species:
 
 # Create a list for the species to go into
 species_list = []
+counter = 0
 
+# Cycle through all planets to find ones that are habitable and generate the species for them
 for i in range(len(planet_list)):
     if planet_list[i].habitable:
-        temp_species_id = i
+        temp_species_id = counter
+        temp_species_planet_id = i
+
+        # This checks the planet's biome to make certain morphologies more common for them
         if planet_list[i].primary_biome == "Temperate":
             temp_morphology_general = random.choices(morphology_general_list, weights=(0.45, 0.1, 0.45))[0]
         elif planet_list[i].primary_biome == "Forest":
@@ -185,11 +199,79 @@ for i in range(len(planet_list)):
             temp_morphology_general = random.choices(morphology_general_list, weights=(0.0, 0.1, 0.9))[0]
         temp_morphology_limbs = random.choices(morphology_limbs_list, weights=(0.02, 0.08, 0.4, 0.3, 0.1, 0.06, 0.04))
 
-        # print(planet_list[i].primary_biome)
-        # print(temp_morphology_general)
-        # print("-----------------------")
+        # Checks the morphology to make certain number of limbs more common
+        if temp_morphology_general == "Primate":
+            temp_morphology_limbs = random.choices(morphology_limbs_list, weights=(0.0, 0.1, 0.4, 0.4, 0.1, 0.0, 0.0))[
+                0]
+        elif temp_morphology_general == "Cetacea":
+            temp_morphology_limbs = random.choices(morphology_limbs_list, weights=(0.1, 0.3, 0.3, 0.3, 0.0, 0.0, 0.0))[
+                0]
+        elif temp_morphology_general == "Arthropod":
+            temp_morphology_limbs = random.choices(morphology_limbs_list, weights=(0.0, 0.0, 0.0, 0.2, 0.2, 0.3, 0.3))[
+                0]
 
+        # Checks the planet's size to make smaller planets produce larger species
+        if planet_list[i].size <= 3:
+            temp_species_height = random.choices(species_height_list, weights=(0.4, 0.3, 0.2, 0.1))[0] + round(
+                random_generator(0, 10) * 0.1, 1)
+        elif planet_list[i].size <= 7:
+            temp_species_height = random.choices(species_height_list, weights=(0.2, 0.3, 0.3, 0.2))[0] + round(
+                random_generator(0, 10) * 0.1, 1)
+        elif planet_list[i].size <= 10:
+            temp_species_height = random.choices(species_height_list, weights=(0.1, 0.1, 0.4, 0.4))[0] + round(
+                random_generator(0, 10) * 0.1, 1)
 
+        # Uses a formula to determine weight based on height
+        temp_species_weight = round((temp_species_height * temp_species_height) * (random_generator(155, 165) * 0.1), 2)
+
+        # Creates and modifies a certain value used in sapience index calculation.
+        # This means certain traits can make a species more or less likely to be intelligent
+        intel_multiplier = 1
+
+        if temp_morphology_general == "Primate":
+            intel_multiplier += 0.7
+        if temp_morphology_general == "Cetacea":
+            intel_multiplier += 0.5
+        if temp_morphology_general == "Arthropod":
+            intel_multiplier += 0
+
+        if temp_species_height < 0.5:
+            intel_multiplier = 0.2
+        elif temp_species_height <= 1:
+            intel_multiplier -= 0.5
+        elif temp_species_height <= 2.5:
+            intel_multiplier += 0.3
+        elif temp_species_height <= 3:
+            intel_multiplier += 0.4
+        elif temp_species_height <= 5:
+            intel_multiplier += 0.1
+
+        # Generates the sapience index
+        temp_sapience_index = math.floor((random_generator(1, 5) * intel_multiplier))
+
+        species = Species(temp_species_id, temp_species_planet_id, temp_morphology_general, temp_morphology_limbs,
+                          temp_species_height,
+                          temp_species_weight, temp_sapience_index)
+        species_list.append(species)
+        counter += 1
+
+# DEBUG TEST CODE
+for i in species_list:
+    print("PLANET DETAILS")
+    print("---------------------------")
+    print(f"Planet ID: {planet_list[i.species_planet_id].planet_id}")
+    print(f"Distance from Star: {planet_list[i.species_planet_id].distance_from_star}AU")
+    print(f"Planet Type: {planet_list[i.species_planet_id].primary_biome}")
+    print(f"Planet Size: {planet_list[i.species_planet_id].size}")
+    print("SPECIES DETAILS")
+    print("---------------------------")
+    print(f"Species ID: {i.species_id}")
+    print(f"Species Morphology: {i.morphology_general}")
+    print(f"Limb Count: {i.morphology_limbs}")
+    print(f"Height: {i.height}")
+    print(f"Weight: {i.weight}")
+    print(f"Sapience Index: {i.sapience_index}")
+    print("===========================")
 # output a csv file for the planets and the species separately
 
 # use pandas sql to read the two csv files
