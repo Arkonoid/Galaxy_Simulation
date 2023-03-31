@@ -256,22 +256,23 @@ for i in range(len(planet_list)):
         counter += 1
 
 # DEBUG TEST CODE
-for i in species_list:
-    print("PLANET DETAILS")
-    print("---------------------------")
-    print(f"Planet ID: {planet_list[i.species_planet_id].planet_id}")
-    print(f"Distance from Star: {planet_list[i.species_planet_id].distance_from_star}AU")
-    print(f"Planet Type: {planet_list[i.species_planet_id].primary_biome}")
-    print(f"Planet Size: {planet_list[i.species_planet_id].size}")
-    print("SPECIES DETAILS")
-    print("---------------------------")
-    print(f"Species ID: {i.species_id}")
-    print(f"Species Morphology: {i.morphology_general}")
-    print(f"Limb Count: {i.morphology_limbs}")
-    print(f"Height: {i.height}")
-    print(f"Weight: {i.weight}")
-    print(f"Sapience Index: {i.sapience_index}")
-    print("===========================")
+# for i in species_list:
+#     print("PLANET DETAILS")
+#     print("---------------------------")
+#     print(f"Planet ID: {planet_list[i.species_planet_id].planet_id}")
+#     print(f"Distance from Star: {planet_list[i.species_planet_id].distance_from_star}AU")
+#     print(f"Planet Type: {planet_list[i.species_planet_id].primary_biome}")
+#     print(f"Planet Size: {planet_list[i.species_planet_id].size}")
+#     print("SPECIES DETAILS")
+#     print("---------------------------")
+#     print(f"Species ID: {i.species_id}")
+#     print(f"Species Morphology: {i.morphology_general}")
+#     print(f"Limb Count: {i.morphology_limbs}")
+#     print(f"Height: {i.height}")
+#     print(f"Weight: {i.weight}")
+#     print(f"Sapience Index: {i.sapience_index}")
+#     print("===========================")
+
 # output a csv file for the planets and the species separately
 
 # use pandas sql to read the two csv files
