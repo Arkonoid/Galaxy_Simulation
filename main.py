@@ -1,16 +1,15 @@
 # Imports
-import math
 import random
 import plotting
 from IPython.display import display
-
 import pandas as pd
 
+# Changes settings in pandas to display the entire dataframe instead of the collapsed version
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
 
-# Setup generator functions
+# Set up the random number generator function
 def random_generator(min_value, max_value):
     random_number = random.randrange(min_value, max_value + 1)
     return random_number
@@ -50,14 +49,10 @@ def planet_codes(code):
             return "UNDEFINED"
 
 
+# Other various lists with values that can be used with the weighted choices
 morphology_general_list = ["Primate", "Cetacea", "Arthropod"]
-
 morphology_limbs_list = [0, 2, 4, 6, 8, 10, 12]
-
 species_height_list = [3, 2, 1, 0]
-species_weight_list_small = []
-species_weight_list_medium = []
-species_weight_list_large = []
 
 
 # Create 'Galaxy' class
@@ -91,7 +86,7 @@ planet_count = round(galaxy_star_count * 0.000001)
 # Create a list for the planets to go into
 planet_list = []
 
-# Empty DataFrame
+# Empty DataFrame for the newly created elements to be added into
 df_planet = pd.DataFrame()
 
 # Generate the properties of each planet
@@ -132,13 +127,17 @@ for i in range(planet_count):
     # Decides whether a fringe planet will be able to support life
     habitability_factor = round(random_generator(0, 100) * 0.01, 2)
 
+    # Habitability is set to true by default
     temp_habitable = True
 
+    # Barren planets will always be uninhabitable
     if temp_primary_biome == "Barren":
         temp_habitable = False
+    # Extreme climate worlds have a 1/20 chance to be habitable
     elif temp_primary_biome == "Lava" or temp_primary_biome == "Toxic" or temp_primary_biome == "Arctic":
         if habitability_factor < 0.95:
             temp_habitable = False
+    # Boarder worlds have a 1/5 chance to be habitable
     elif temp_primary_biome == "Craig" or temp_primary_biome == "Desert":
         if habitability_factor < 0.8:
             temp_habitable = False
@@ -150,6 +149,7 @@ for i in range(planet_count):
     # Add the newly created planet to the list
     planet_list.append(planet)
 
+    # Create the DF with the properties
     my_df_temp = {
         'PLANET ID': [temp_id],
         'PLANET SIZE': [temp_size],
@@ -158,11 +158,10 @@ for i in range(planet_count):
         'HABITABLE': [temp_habitable]
     }
 
+    # Merge the new DF with the existing one to effectively *add it to the list*
     df_temp = pd.DataFrame(my_df_temp)
     df_planet = pd.concat([df_planet, df_temp])
 
-
-# print('DataFrame:\n', df_planet)
 
 # Create 'Species' class
 class Species:
@@ -267,12 +266,21 @@ for i in range(len(planet_list)):
         if temp_sapience_index > 10:
             temp_sapience_index = 10
 
-        species = Species(temp_species_id, temp_species_planet_id, temp_morphology_general, temp_morphology_limbs,
+        # Creates the new species from the generated traits
+        species = Species(temp_species_id,
+                          temp_species_planet_id,
+                          temp_morphology_general,
+                          temp_morphology_limbs,
                           temp_species_height,
-                          temp_species_weight, temp_sapience_index)
+                          temp_species_weight,
+                          temp_sapience_index)
+
+        # Adds the species to the list (Honestly unused now that the sqlite DB is gone)
         species_list.append(species)
+        #Iterates the counter for the next species id
         counter += 1
 
+        # Create the DF with the properties
         my_df_temp = {
             'SPECIES ID': [temp_species_id],
             'PLANET ID': [temp_species_planet_id],
@@ -283,10 +291,10 @@ for i in range(len(planet_list)):
             'SAPIENCE INDEX': [temp_sapience_index]
         }
 
+        # Merge the new DF with the existing one to effectively *add it to the list*
         df_temp = pd.DataFrame(my_df_temp)
         df_species = pd.concat([df_species, df_temp])
 
-# print('DataFrame:\n', df_species)
 
 # Save DataFrames as a CSV File
 planet_csv_data = df_planet.to_csv('planet_data.csv', index=False)
@@ -329,39 +337,10 @@ def display_species():
 #     print(f"Sapience Index: {i.sapience_index}")
 #     print("===========================")
 
-# output a csv file for the planets and the species separately
-
-# use pandas sql to read the two csv files
-
-# join the two tables
-
-# print(galaxy1.size)
-# print(galaxy1.shape)
-# print("{:,}".format(galaxy1.number_of_stars))
-
-# Create 'Star' class
-# star_list = []
-# star_class_list = ['O', 'B', 'A', 'F', 'G', 'K', 'M']
-# for i in range(1000000):
-#     star_class = random.choices(star_class_list, weights=(0.00003, 0.0013, 0.006, 0.03, 0.076, 0.121, 0.7645))
-#     star_list.append(star_class[0])
-
-
-# Generate 'Planet' class
-
-#   Generate number of planets based on stars
-
-#   Generate distance of planets
-#   Generate size off planets
-#   Generate type of planet
-
-# Generate 'Species' class
-
-
-#   Generate species based on planet type
-#   Generate species traits
-
 # User Interface
+
+
+# Main program loop
 end_program = False
 print("Welcome to the Galaxy Simulator v0.5!")
 print("\nA new galaxy has already been generated for you, and been filled with randomly generated "
