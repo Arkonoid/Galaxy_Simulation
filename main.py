@@ -1,7 +1,10 @@
 # Imports
 import random
 import math
+import pandas as pd
+import sqlite3
 
+conn = sqlite3.connect('galaxy.db')
 
 # Setup generator functions
 def random_generator(min_value, max_value):
@@ -61,7 +64,7 @@ class Galaxy:
 
 
 # Generate the number of stars
-galaxy_star_count = random_generator(75000000000, 125000000000)
+galaxy_star_count = random_generator(750000000, 1250000000)
 
 # Generate the galaxy
 galaxy1 = Galaxy(galaxy_star_count)
@@ -83,6 +86,9 @@ planet_count = round(galaxy_star_count * 0.000001)
 
 # Create a list for the planets to go into
 planet_list = []
+
+# Empty DataFrame
+df_planet = pd.DataFrame()
 
 # Generate the properties of each planet
 for i in range(planet_count):
@@ -137,19 +143,21 @@ for i in range(planet_count):
 
     # Creates the planet based on the generated properties
     planet = Planet(temp_id, temp_size, temp_primary_biome, temp_distance_from_star, temp_habitable)
-
     # Add the newly created planet to the list
     planet_list.append(planet)
 
+    my_df_temp = {
+        'PLANET_ID': [temp_id],
+        'PLANET_SIZE': [temp_size],
+        'PRIMARY_BIOME': [temp_primary_biome],
+        'DISTANCE_FROM_STAR': [temp_distance_from_star],
+        'HABITABLE': [temp_habitable]
+    }
 
-# for i in range(planet_count):
-#     print(planet_list[i].planet_id)
-#     print(planet_list[i].size)
-#     print(planet_list[i].primary_biome)
-#     print(planet_list[i].distance_from_star)
-#     print(planet_list[i].habitable)
-#     print("-------------------")
+    df_temp = pd.DataFrame(my_df_temp)
+    df_planet = pd.concat([df_planet, df_temp])
 
+# print('DataFrame:\n', df_planet)
 
 # Create 'Species' class
 class Species:
@@ -167,6 +175,9 @@ class Species:
 # Create a list for the species to go into
 species_list = []
 counter = 0
+
+# Empty DataFrame for Species
+df_species = pd.DataFrame()
 
 # Cycle through all planets to find ones that are habitable and generate the species for them
 for i in range(len(planet_list)):
@@ -254,6 +265,37 @@ for i in range(len(planet_list)):
                           temp_species_weight, temp_sapience_index)
         species_list.append(species)
         counter += 1
+
+        my_df_temp = {
+            'SPECIES ID': [temp_species_id],
+            'PLANET ID': [temp_species_planet_id],
+            'MORPHOLOGY': [temp_morphology_general],
+            'LIMB COUNT': [temp_morphology_limbs],
+            'HEIGHT': [temp_species_height],
+            'WEIGHT': [temp_species_weight],
+            'SAPIENCE INDEX': [temp_sapience_index]
+        }
+
+        df_temp = pd.DataFrame(my_df_temp)
+        df_species = pd.concat([df_species, df_temp])
+
+# print('DataFrame:\n', df_species)
+
+# Save DataFrames as a CSV File
+planet_csv_data = df_planet.to_csv('planet_data.csv', index=False)
+print('\nCSV String: ', planet_csv_data)
+species_csv_data = df_species.to_csv('species_data.csv', index=False)
+print('\nCSV String: ', species_csv_data)
+
+# Load CSV data into Pandas DataFrame
+planet_data = pd.read_csv('planet_data.csv')
+species_data = pd.read_csv('species_data.csv')
+
+# Write the data to a sqlite table
+planet_data.to_sql('test', conn, if_exists='replace', index=False)
+species_data.to_sql('test2', conn, if_exists='replace', index=False)
+
+conn.close()
 
 # DEBUG TEST CODE
 # for i in species_list:
