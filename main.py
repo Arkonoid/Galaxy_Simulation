@@ -2,9 +2,8 @@
 import random
 import math
 import pandas as pd
-import sqlite3
+import pandasql
 
-conn = sqlite3.connect('galaxy.db')
 
 # Setup generator functions
 def random_generator(min_value, max_value):
@@ -64,7 +63,7 @@ class Galaxy:
 
 
 # Generate the number of stars
-galaxy_star_count = random_generator(750000000, 1250000000)
+galaxy_star_count = random_generator(75000000000, 125000000000)
 
 # Generate the galaxy
 galaxy1 = Galaxy(galaxy_star_count)
@@ -120,10 +119,10 @@ for i in range(planet_count):
             random.choices(planet_codes_weighted_list, weights=(0.3, 0, 0.1, 0.1, 0.1, 0, 0, 0, 0.3, 0.1, 0, 0))[0])
     elif temp_distance_from_star <= 1.4:
         temp_primary_biome = planet_codes(
-            random.choices(planet_codes_weighted_list, weights=(0.4, 0, 0, 0, 0, 0.1, 0, 0, 0.1, 0.4, 0, 0))[0])
+            random.choices(planet_codes_weighted_list, weights=(0.5, 0, 0, 0, 0, 0.1, 0, 0, 0.1, 0.3, 0, 0))[0])
     elif temp_distance_from_star > 1.4:
         temp_primary_biome = planet_codes(
-            random.choices(planet_codes_weighted_list, weights=(0.6, 0, 0, 0, 0, 0, 0, 0, 0, 0.4, 0, 0))[0])
+            random.choices(planet_codes_weighted_list, weights=(0.7, 0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0, 0))[0])
 
     # Decides whether a fringe planet will be able to support life
     habitability_factor = round(random_generator(0, 100) * 0.01, 2)
@@ -132,10 +131,10 @@ for i in range(planet_count):
 
     if temp_primary_biome == "Barren":
         temp_habitable = False
-    elif temp_primary_biome == "Lava" or temp_primary_biome == "Toxic":
+    elif temp_primary_biome == "Lava" or temp_primary_biome == "Toxic" or temp_primary_biome == "Arctic":
         if habitability_factor < 0.95:
             temp_habitable = False
-    elif temp_primary_biome == "Craig" or temp_primary_biome == "Desert" or temp_primary_biome == "Arctic":
+    elif temp_primary_biome == "Craig" or temp_primary_biome == "Desert":
         if habitability_factor < 0.8:
             temp_habitable = False
     else:
@@ -147,15 +146,16 @@ for i in range(planet_count):
     planet_list.append(planet)
 
     my_df_temp = {
-        'PLANET_ID': [temp_id],
-        'PLANET_SIZE': [temp_size],
-        'PRIMARY_BIOME': [temp_primary_biome],
-        'DISTANCE_FROM_STAR': [temp_distance_from_star],
+        'PLANET ID': [temp_id],
+        'PLANET SIZE': [temp_size],
+        'PRIMARY BIOME': [temp_primary_biome],
+        'DISTANCE FROM STAR': [temp_distance_from_star],
         'HABITABLE': [temp_habitable]
     }
 
     df_temp = pd.DataFrame(my_df_temp)
     df_planet = pd.concat([df_planet, df_temp])
+
 
 # print('DataFrame:\n', df_planet)
 
@@ -291,11 +291,11 @@ print('\nCSV String: ', species_csv_data)
 planet_data = pd.read_csv('planet_data.csv')
 species_data = pd.read_csv('species_data.csv')
 
-# Write the data to a sqlite table
-planet_data.to_sql('test', conn, if_exists='replace', index=False)
-species_data.to_sql('test2', conn, if_exists='replace', index=False)
+# Create a New DataFrame that Joins Planets and Species on Planet ID
+galaxy_df = pd.merge(planet_data, species_data, on='PLANET ID')
+galaxy_csv_data = galaxy_df.to_csv('galaxy_data.csv', index=False)
 
-conn.close()
+print(galaxy_df)
 
 # DEBUG TEST CODE
 # for i in species_list:
