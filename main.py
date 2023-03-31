@@ -1,8 +1,13 @@
 # Imports
-import random
 import math
+import random
+import plotting
+from IPython.display import display
+
 import pandas as pd
-import pandasql
+
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
 
 
 # Setup generator functions
@@ -63,7 +68,7 @@ class Galaxy:
 
 
 # Generate the number of stars
-galaxy_star_count = random_generator(75000000000, 125000000000)
+galaxy_star_count = random_generator(1000000000, 2000000000)
 
 # Generate the galaxy
 galaxy1 = Galaxy(galaxy_star_count)
@@ -212,14 +217,14 @@ for i in range(len(planet_list)):
 
         # Checks the morphology to make certain number of limbs more common
         if temp_morphology_general == "Primate":
-            temp_morphology_limbs = random.choices(morphology_limbs_list, weights=(0.0, 0.1, 0.4, 0.4, 0.1, 0.0, 0.0))[
-                0]
+            temp_morphology_limbs = random.choices(morphology_limbs_list,
+                                                   weights=(0.0, 0.1, 0.4, 0.4, 0.1, 0.0, 0.0))[0]
         elif temp_morphology_general == "Cetacea":
-            temp_morphology_limbs = random.choices(morphology_limbs_list, weights=(0.1, 0.3, 0.3, 0.3, 0.0, 0.0, 0.0))[
-                0]
+            temp_morphology_limbs = random.choices(morphology_limbs_list,
+                                                   weights=(0.1, 0.3, 0.3, 0.3, 0.0, 0.0, 0.0))[0]
         elif temp_morphology_general == "Arthropod":
-            temp_morphology_limbs = random.choices(morphology_limbs_list, weights=(0.0, 0.0, 0.0, 0.2, 0.2, 0.3, 0.3))[
-                0]
+            temp_morphology_limbs = random.choices(morphology_limbs_list,
+                                                   weights=(0.0, 0.0, 0.0, 0.2, 0.2, 0.3, 0.3))[0]
 
         # Checks the planet's size to make smaller planets produce larger species
         if planet_list[i].size <= 3:
@@ -240,25 +245,27 @@ for i in range(len(planet_list)):
         intel_multiplier = 1
 
         if temp_morphology_general == "Primate":
-            intel_multiplier += 0.7
+            intel_multiplier += 0.3
         if temp_morphology_general == "Cetacea":
-            intel_multiplier += 0.5
+            intel_multiplier += 0.2
         if temp_morphology_general == "Arthropod":
-            intel_multiplier += 0
+            intel_multiplier -= 0.2
 
         if temp_species_height < 0.5:
             intel_multiplier = 0.2
         elif temp_species_height <= 1:
             intel_multiplier -= 0.5
         elif temp_species_height <= 2.5:
-            intel_multiplier += 0.3
+            intel_multiplier += 0
         elif temp_species_height <= 3:
-            intel_multiplier += 0.4
+            intel_multiplier += 0.2
         elif temp_species_height <= 5:
-            intel_multiplier += 0.1
+            intel_multiplier -= 0.2
 
         # Generates the sapience index
-        temp_sapience_index = math.floor((random_generator(1, 5) * intel_multiplier))
+        temp_sapience_index = round((random_generator(50, 70) * 0.1) * intel_multiplier)
+        if temp_sapience_index > 10:
+            temp_sapience_index = 10
 
         species = Species(temp_species_id, temp_species_planet_id, temp_morphology_general, temp_morphology_limbs,
                           temp_species_height,
@@ -295,7 +302,14 @@ species_data = pd.read_csv('species_data.csv')
 galaxy_df = pd.merge(planet_data, species_data, on='PLANET ID')
 galaxy_csv_data = galaxy_df.to_csv('galaxy_data.csv', index=False)
 
-print(galaxy_df)
+
+def display_planets():
+    display(planet_data)
+
+
+def display_species():
+    display(species_data)
+
 
 # DEBUG TEST CODE
 # for i in species_list:
@@ -346,3 +360,33 @@ print(galaxy_df)
 
 #   Generate species based on planet type
 #   Generate species traits
+
+# User Interface
+end_program = False
+print("Welcome to the Galaxy Simulator v0.5!")
+print("\nA new galaxy has already been generated for you, and been filled with randomly generated "
+      "planets and species. Select the options below to see some of the data on this new galaxy!\n")
+while not end_program:
+    print("============================================")
+    print("What would you like to do?")
+    print("1) Display Raw DataFrame for Planets")
+    print("2) Display Raw DataFrame for Species")
+    print("3) View Height and Weight Correlation for species")
+    print("4) View Height and Planet Size Correlation for species")
+    print("5) View Morphology and Sapience Index Comparison")
+    print("Enter anything else to exit\n")
+
+    selection = int(input('Selection: '))
+    match selection:
+        case 1:
+            display_planets()
+        case 2:
+            display_species()
+        case 3:
+            plotting.weight_chart_display()
+        case 4:
+            plotting.size_chart_display()
+        case 5:
+            plotting.sapience_chart_display()
+        case _:
+            end_program = True
